@@ -1,56 +1,43 @@
-# Time series FAANG prediction using ANN
-
-Sklearn implementaiton of Artificial Neural Network prediction of FAANG trading data
+# Image Classification Comparison of Methods
 
 ### 1. Folder Structure
 
 ```python
 Repository
- |-- ANN_tuning_code.ipynb	# Main code notebook
- |    |-- input     # input csv data
- |    |    |-- fundamentals.csv               
- |    |    |-- prices-split-adjusted.csv     
- |    |    |-- prices.csv                     
- |    |    |-- securities.csv                
+ |-- classification_code.ipynb	# Main code notebook
+ |    |-- input          # data inputs
+ |    |    |-- train
+ |    |    |    |-- images_training.h5           # model train dataset
+ |    |    |-- test
+ |    |    |    |-- images_testing.h5            # model test dataset
+ |    |    |    |-- labels_testing_2000.h5       # image classification labels of test dataset
+ |    |-- images          # for ReadMe file
 ```
 
 ### 2. Overview
 
-Sklearn implementaiton of Artificial Neural Network prediction of FAANG trading data
+In this project I will be running and comparing three classification methods K Nearest Neighbours, Naïve Bayes Algorithm and Multimonial Logistic Regression on the fashion MNIST image dataset.
 
-### 3. Data Source
+The objective is to classify they gray scale images into one of the classes of clothing below
 
-This data was obtained through Kaggle: [link](https://www.kaggle.com/dgawlik/nyse). The dataset contained daily Open, Close, Low, High and Volume metrics for each stock on the NYSE from 2013 to 2016.
+![method1](/images/method-1.png)
 
-### 4. Methodology
+### 3. Methodology
 
-The basic structure of an artificial neural network consists of 3 layers – input layer, layer of neurons and output layer which generates the predicted values.
- 
-The input values are first transformed by adding a weighting. This weight vector is initialised by the Keras function kernel_initializer and then passed through an activation function which decides whether to keep the neuron for the next network layer or output layer. The basic weight function is shown below applied on input value x. z=w^T x + b
+The Naïve Bayes algorithm using bayes theorem to calculate the probability of a class given a test image. The predicted class is then the class that maximises the probability below.
 
-Within the output neuron a cost function is calculated and minimised through an optimisation algorithm which in this project is minimising the MSE between the train stock price and predicted stock price from the cross-validation holdout set. Once the optimisation converges the error is fed back into the input layer and the weights are updated. Common optimisation algorithms are stochastic gradient descent and adaptive moment estimation (Adam).
+![method2](/images/method-2.png)
 
-Once the entire learning process has been completed which is determined by the number of epochs or forward-backward passes through the neural network layers, the output layer produces a final estimated stock price.
+Where P(class) is the prior from the train set, P(image|class) is the likelihood calculated from the training set which is assumed to be Gaussian. P(image) is the marginal probability, since the images are viewed to be independent which is the definition of Naïve Bayes, the denominator can be ignored.
 
-To reduce the risk of overfitting, a dropout term is used. This sets a percentage of samples to zero after the neuron layer. In my hyperparameter tuning I selected 10% of samples to be removed.
+The multinomial logistic regression works by converting the feature vectors (z) of the image into a probability vector using the softmax function below where k is each class label. 
 
-ANN model was chosen as it has been demonstrated to be a strong candidate model for financial time series analysis and it can be customised to be very simple or complex through the number of choice of number of neurons and the transformations involved at the end of each layer. This means it can capture both simple and complex patterns that are common in a selection of stocks.
+![method3](/images/method-3.png)
 
-The pre-processing methods used on the train dataset was standardisation which was important to enable convergence of the ANN weights.
+Using this formula, we output probability values between 0 and 1. The algorithm then generates the predicted class based on the highest probability.
 
-Further the close price was shifted 1 row so that the open, low, high prices etc were corresponding to the following days close price (today + 1).
+### 4. Results
 
+Of the three algorithms considered the highest test prediction accuracy was generated from the Multinomial Logistic Regression with 83.90% accuracy, likely due to fine-tuned parameters.
 
-### 5. Results
-
-The best model resulting from the tuning process was a single layer ANN with a normal weight initialisation, 100 neurons and a small learning rate which is more likely to find the minimal MSE point for a specific neuron. This configuration was used in cross validation testing on the FAANG stocks.
-
-![result1](/images/result-1.png)
-
-![result2](/images/result-2.png)
-
-The large cross validation scores for Amazon and Netflix could be the result of correlated predictors or explainable due to the adaptive Adam estimation finding a saddle point along the gradient descent. The best performing stock using the ANN model was Netflix with a 88% cross validation score. Compared to the random forest the ANN was computationally slow which might be due to the dropout function.
-
-As seen from the graphs below, visually Facebook's prediction had the highest error (blue = actual, orange = predicted) with a general observation being the ANN was effective at predicting the direction of the daily stock movement but not the magnitude.
-
-![result3](/images/result-3.png)
+Based on my results a probability-based measure is more effective than a distance-based algorithm, and parametric models performed better than the non-parametric KNN model. All 3 tested were supervised algorithms, it would be interesting to see how semi-supervised methods such as manifold learning or ensemble methods combining multiple algorithms.
